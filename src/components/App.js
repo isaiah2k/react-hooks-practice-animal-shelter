@@ -1,11 +1,33 @@
-import React, { useState } from "react";
-
-import Filters from "./Filters";
-import PetBrowser from "./PetBrowser";
+import { useState } from "react"
+import Filters from "./Filters"
+import PetBrowser from "./PetBrowser"
 
 function App() {
-  const [pets, setPets] = useState([]);
-  const [filters, setFilters] = useState({ type: "all" });
+  const [pets, setPets] = useState([])
+  const [filters, setFilters] = useState({ type: "all" })
+
+  function handleChangeType(value) {
+    setFilters({ ...filters, type: value })
+  }
+
+  function handleFindPetsClick() {
+    const baseUrl = "http://localhost:3001/pets"
+    const url =
+      filters.type === "all"
+        ? baseUrl
+        : `${baseUrl}?type=${filters.type}`
+
+    fetch(url)
+      .then((res) => res.json())
+      .then((data) => setPets(data))
+  }
+
+  function handleAdoptPet(petId) {
+    const updatedPets = pets.map((pet) =>
+      pet.id === petId ? { ...pet, isAdopted: true } : pet
+    )
+    setPets(updatedPets)
+  }
 
   return (
     <div className="ui container">
@@ -15,15 +37,18 @@ function App() {
       <div className="ui container">
         <div className="ui grid">
           <div className="four wide column">
-            <Filters />
+            <Filters
+              onChangeType={handleChangeType}
+              onFindPetsClick={handleFindPetsClick}
+            />
           </div>
           <div className="twelve wide column">
-            <PetBrowser />
+            <PetBrowser pets={pets} onAdoptPet={handleAdoptPet} />
           </div>
         </div>
       </div>
     </div>
-  );
+  )
 }
 
-export default App;
+export default App
